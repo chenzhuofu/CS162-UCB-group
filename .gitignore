@@ -143,6 +143,7 @@ Sessionx.vim
 
 # Self generated files
 .cache/
+compile_commands.json
 
 # Auto-generated tag files
 tags
