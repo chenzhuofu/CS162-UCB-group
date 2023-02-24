@@ -102,6 +102,10 @@ static void start_process(void* file_name_) {
     success = load(file_name, &if_.eip, &if_.esp);
   }
 
+  /*** my change for project 0 ***/
+  if_.esp -= 20;
+
+
   /* Handle failure with succesful PCB malloc. Must free the PCB */
   if (!success && pcb_success) {
     // Avoid race where PCB is freed before t->pcb is set to NULL
