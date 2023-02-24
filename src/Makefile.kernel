@@ -17,4 +17,4 @@ build/%: $(DIRS) build/Makefile
 	cd build && $(MAKE) $*
 
 clean:
-	rm -rf build ../.cache
+	rm -rf build

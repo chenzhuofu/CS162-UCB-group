@@ -133,11 +133,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/open-empty.o", 
-            "../../tests/userprog/open-empty.c"
+            "tests/userprog/bad-jump2.o", 
+            "../../tests/userprog/bad-jump2.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/open-empty.c"
+        "file": "../../tests/userprog/bad-jump2.c"
     }, 
     {
         "arguments": [
@@ -239,19 +239,20 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/user", 
-            "-I.", 
+            "-I../../lib/kernel", 
             "-Wall", 
             "-W", 
             "-Wstrict-prototypes", 
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
+            "-DUSERPROG", 
+            "-DFILESYS", 
             "-o", 
-            "tests/userprog/read-bad-fd.o", 
-            "../../tests/userprog/read-bad-fd.c"
+            "lib/random.o", 
+            "../../lib/random.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/read-bad-fd.c"
+        "file": "../../lib/random.c"
     }, 
     {
         "arguments": [
@@ -276,11 +277,11 @@
             "-DUSERPROG", 
             "-DFILESYS", 
             "-o", 
-            "devices/shutdown.o", 
-            "../../devices/shutdown.c"
+            "userprog/exception.o", 
+            "../exception.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../devices/shutdown.c"
+        "file": "../exception.c"
     }, 
     {
         "arguments": [
@@ -388,11 +389,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/close-normal.o", 
-            "../../tests/userprog/close-normal.c"
+            "tests/lib.o", 
+            "../../tests/lib.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/close-normal.c"
+        "file": "../../tests/lib.c"
     }, 
     {
         "arguments": [
@@ -493,34 +494,6 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/user", 
-            "-I.", 
-            "-Wall", 
-            "-W", 
-            "-Wstrict-prototypes", 
-            "-Wmissing-prototypes", 
-            "-Wsystem-headers", 
-            "-o", 
-            "tests/filesys/base/sm-random.o", 
-            "../../tests/filesys/base/sm-random.c"
-        ], 
-        "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/filesys/base/sm-random.c"
-    }, 
-    {
-        "arguments": [
-            "cc", 
-            "-c", 
-            "-m32", 
-            "-ggdb3", 
-            "-O0", 
-            "-march=i686", 
-            "-fno-pic", 
-            "-fno-inline", 
-            "-fno-stack-protector", 
-            "-nostdinc", 
-            "-I../..", 
-            "-I../../lib", 
             "-I../../lib/kernel", 
             "-Wall", 
             "-W", 
@@ -530,11 +503,11 @@
             "-DUSERPROG", 
             "-DFILESYS", 
             "-o", 
-            "filesys/file.o", 
-            "../../filesys/file.c"
+            "devices/speaker.o", 
+            "../../devices/speaker.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../filesys/file.c"
+        "file": "../../devices/speaker.c"
     }, 
     {
         "arguments": [
@@ -642,6 +615,34 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
+            "tests/userprog/wait-twice.o", 
+            "../../tests/userprog/wait-twice.c"
+        ], 
+        "directory": "/home/vagrant/code/group/src/userprog/build", 
+        "file": "../../tests/userprog/wait-twice.c"
+    }, 
+    {
+        "arguments": [
+            "cc", 
+            "-c", 
+            "-m32", 
+            "-ggdb3", 
+            "-O0", 
+            "-march=i686", 
+            "-fno-pic", 
+            "-fno-inline", 
+            "-fno-stack-protector", 
+            "-nostdinc", 
+            "-I../..", 
+            "-I../../lib", 
+            "-I../../lib/user", 
+            "-I.", 
+            "-Wall", 
+            "-W", 
+            "-Wstrict-prototypes", 
+            "-Wmissing-prototypes", 
+            "-Wsystem-headers", 
+            "-o", 
             "tests/userprog/close-stdout.o", 
             "../../tests/userprog/close-stdout.c"
         ], 
@@ -662,20 +663,19 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/kernel", 
+            "-I../../lib/user", 
+            "-I.", 
             "-Wall", 
             "-W", 
             "-Wstrict-prototypes", 
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
-            "-DUSERPROG", 
-            "-DFILESYS", 
             "-o", 
-            "userprog/syscall.o", 
-            "../syscall.c"
+            "tests/userprog/read-boundary.o", 
+            "../../tests/userprog/read-boundary.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../syscall.c"
+        "file": "../../tests/userprog/read-boundary.c"
     }, 
     {
         "arguments": [
@@ -727,11 +727,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/bad-jump2.o", 
-            "../../tests/userprog/bad-jump2.c"
+            "tests/userprog/open-empty.o", 
+            "../../tests/userprog/open-empty.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/bad-jump2.c"
+        "file": "../../tests/userprog/open-empty.c"
     }, 
     {
         "arguments": [
@@ -785,11 +785,11 @@
             "-DUSERPROG", 
             "-DFILESYS", 
             "-o", 
-            "lib/stdlib.o", 
-            "../../lib/stdlib.c"
+            "userprog/tss.o", 
+            "../tss.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../lib/stdlib.c"
+        "file": "../tss.c"
     }, 
     {
         "arguments": [
@@ -813,11 +813,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/filesys/base/syn-remove.o", 
-            "../../tests/filesys/base/syn-remove.c"
+            "tests/userprog/write-stdin.o", 
+            "../../tests/userprog/write-stdin.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/filesys/base/syn-remove.c"
+        "file": "../../tests/userprog/write-stdin.c"
     }, 
     {
         "arguments": [
@@ -897,11 +897,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/exec-bound-3.o", 
-            "../../tests/userprog/exec-bound-3.c"
+            "tests/userprog/sc-bad-sp.o", 
+            "../../tests/userprog/sc-bad-sp.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/exec-bound-3.c"
+        "file": "../../tests/userprog/sc-bad-sp.c"
     }, 
     {
         "arguments": [
@@ -1039,11 +1039,11 @@
             "-DUSERPROG", 
             "-DFILESYS", 
             "-o", 
-            "userprog/tss.o", 
-            "../tss.c"
+            "lib/stdlib.o", 
+            "../../lib/stdlib.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../tss.c"
+        "file": "../../lib/stdlib.c"
     }, 
     {
         "arguments": [
@@ -1059,20 +1059,19 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/kernel", 
+            "-I../../lib/user", 
+            "-I.", 
             "-Wall", 
             "-W", 
             "-Wstrict-prototypes", 
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
-            "-DUSERPROG", 
-            "-DFILESYS", 
             "-o", 
-            "lib/kernel/hash.o", 
-            "../../lib/kernel/hash.c"
+            "tests/userprog/no-vm/multi-oom.o", 
+            "../../tests/userprog/no-vm/multi-oom.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../lib/kernel/hash.c"
+        "file": "../../tests/userprog/no-vm/multi-oom.c"
     }, 
     {
         "arguments": [
@@ -1180,6 +1179,34 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
+            "tests/userprog/exec-bound-3.o", 
+            "../../tests/userprog/exec-bound-3.c"
+        ], 
+        "directory": "/home/vagrant/code/group/src/userprog/build", 
+        "file": "../../tests/userprog/exec-bound-3.c"
+    }, 
+    {
+        "arguments": [
+            "cc", 
+            "-c", 
+            "-m32", 
+            "-ggdb3", 
+            "-O0", 
+            "-march=i686", 
+            "-fno-pic", 
+            "-fno-inline", 
+            "-fno-stack-protector", 
+            "-nostdinc", 
+            "-I../..", 
+            "-I../../lib", 
+            "-I../../lib/user", 
+            "-I.", 
+            "-Wall", 
+            "-W", 
+            "-Wstrict-prototypes", 
+            "-Wmissing-prototypes", 
+            "-Wsystem-headers", 
+            "-o", 
             "tests/userprog/child-simple.o", 
             "../../tests/userprog/child-simple.c"
         ], 
@@ -1208,11 +1235,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/rox-multichild.o", 
-            "../../tests/userprog/rox-multichild.c"
+            "tests/userprog/exec-bound.o", 
+            "../../tests/userprog/exec-bound.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/rox-multichild.c"
+        "file": "../../tests/userprog/exec-bound.c"
     }, 
     {
         "arguments": [
@@ -1298,34 +1325,6 @@
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
         "file": "../../lib/user/debug.c"
-    }, 
-    {
-        "arguments": [
-            "cc", 
-            "-c", 
-            "-m32", 
-            "-ggdb3", 
-            "-O0", 
-            "-march=i686", 
-            "-fno-pic", 
-            "-fno-inline", 
-            "-fno-stack-protector", 
-            "-nostdinc", 
-            "-I../..", 
-            "-I../../lib", 
-            "-I../../lib/user", 
-            "-I.", 
-            "-Wall", 
-            "-W", 
-            "-Wstrict-prototypes", 
-            "-Wmissing-prototypes", 
-            "-Wsystem-headers", 
-            "-o", 
-            "tests/userprog/sc-bad-sp.o", 
-            "../../tests/userprog/sc-bad-sp.c"
-        ], 
-        "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/sc-bad-sp.c"
     }, 
     {
         "arguments": [
@@ -1604,11 +1603,11 @@
             "-DUSERPROG", 
             "-DFILESYS", 
             "-o", 
-            "lib/stdio.o", 
-            "../../lib/stdio.c"
+            "devices/rtc.o", 
+            "../../devices/rtc.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../lib/stdio.c"
+        "file": "../../devices/rtc.c"
     }, 
     {
         "arguments": [
@@ -1773,11 +1772,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/write-stdin.o", 
-            "../../tests/userprog/write-stdin.c"
+            "tests/filesys/base/syn-remove.o", 
+            "../../tests/filesys/base/syn-remove.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/write-stdin.c"
+        "file": "../../tests/filesys/base/syn-remove.c"
     }, 
     {
         "arguments": [
@@ -1807,6 +1806,34 @@
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
         "file": "../../filesys/free-map.c"
+    }, 
+    {
+        "arguments": [
+            "cc", 
+            "-c", 
+            "-m32", 
+            "-ggdb3", 
+            "-O0", 
+            "-march=i686", 
+            "-fno-pic", 
+            "-fno-inline", 
+            "-fno-stack-protector", 
+            "-nostdinc", 
+            "-I../..", 
+            "-I../../lib", 
+            "-I../../lib/user", 
+            "-I.", 
+            "-Wall", 
+            "-W", 
+            "-Wstrict-prototypes", 
+            "-Wmissing-prototypes", 
+            "-Wsystem-headers", 
+            "-o", 
+            "tests/userprog/create-null.o", 
+            "../../tests/userprog/create-null.c"
+        ], 
+        "directory": "/home/vagrant/code/group/src/userprog/build", 
+        "file": "../../tests/userprog/create-null.c"
     }, 
     {
         "arguments": [
@@ -1944,11 +1971,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/exec-bound.o", 
-            "../../tests/userprog/exec-bound.c"
+            "tests/userprog/rox-multichild.o", 
+            "../../tests/userprog/rox-multichild.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/exec-bound.c"
+        "file": "../../tests/userprog/rox-multichild.c"
     }, 
     {
         "arguments": [
@@ -2025,6 +2052,34 @@
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
         "file": "../../threads/switch.S"
+    }, 
+    {
+        "arguments": [
+            "cc", 
+            "-c", 
+            "-m32", 
+            "-ggdb3", 
+            "-O0", 
+            "-march=i686", 
+            "-fno-pic", 
+            "-fno-inline", 
+            "-fno-stack-protector", 
+            "-nostdinc", 
+            "-I../..", 
+            "-I../../lib", 
+            "-I../../lib/user", 
+            "-I.", 
+            "-Wall", 
+            "-W", 
+            "-Wstrict-prototypes", 
+            "-Wmissing-prototypes", 
+            "-Wsystem-headers", 
+            "-o", 
+            "tests/userprog/wait-bad-pid.o", 
+            "../../tests/userprog/wait-bad-pid.c"
+        ], 
+        "directory": "/home/vagrant/code/group/src/userprog/build", 
+        "file": "../../tests/userprog/wait-bad-pid.c"
     }, 
     {
         "arguments": [
@@ -2190,11 +2245,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/read-normal.o", 
-            "../../tests/userprog/read-normal.c"
+            "tests/userprog/open-normal.o", 
+            "../../tests/userprog/open-normal.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/read-normal.c"
+        "file": "../../tests/userprog/open-normal.c"
     }, 
     {
         "arguments": [
@@ -2302,34 +2357,6 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/no-vm/multi-oom.o", 
-            "../../tests/userprog/no-vm/multi-oom.c"
-        ], 
-        "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/no-vm/multi-oom.c"
-    }, 
-    {
-        "arguments": [
-            "cc", 
-            "-c", 
-            "-m32", 
-            "-ggdb3", 
-            "-O0", 
-            "-march=i686", 
-            "-fno-pic", 
-            "-fno-inline", 
-            "-fno-stack-protector", 
-            "-nostdinc", 
-            "-I../..", 
-            "-I../../lib", 
-            "-I../../lib/user", 
-            "-I.", 
-            "-Wall", 
-            "-W", 
-            "-Wstrict-prototypes", 
-            "-Wmissing-prototypes", 
-            "-Wsystem-headers", 
-            "-o", 
             "tests/userprog/read-bad-ptr.o", 
             "../../tests/userprog/read-bad-ptr.c"
         ], 
@@ -2359,40 +2386,11 @@
             "-DUSERPROG", 
             "-DFILESYS", 
             "-o", 
-            "lib/random.o", 
-            "../../lib/random.c"
+            "filesys/file.o", 
+            "../../filesys/file.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../lib/random.c"
-    }, 
-    {
-        "arguments": [
-            "cc", 
-            "-c", 
-            "-m32", 
-            "-ggdb3", 
-            "-O0", 
-            "-march=i686", 
-            "-fno-pic", 
-            "-fno-inline", 
-            "-fno-stack-protector", 
-            "-nostdinc", 
-            "-I../..", 
-            "-I../../lib", 
-            "-I../../lib/kernel", 
-            "-Wall", 
-            "-W", 
-            "-Wstrict-prototypes", 
-            "-Wmissing-prototypes", 
-            "-Wsystem-headers", 
-            "-DUSERPROG", 
-            "-DFILESYS", 
-            "-o", 
-            "devices/speaker.o", 
-            "../../devices/speaker.c"
-        ], 
-        "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../devices/speaker.c"
+        "file": "../../filesys/file.c"
     }, 
     {
         "arguments": [
@@ -2617,34 +2615,6 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/exit.o", 
-            "../../tests/userprog/exit.c"
-        ], 
-        "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/exit.c"
-    }, 
-    {
-        "arguments": [
-            "cc", 
-            "-c", 
-            "-m32", 
-            "-ggdb3", 
-            "-O0", 
-            "-march=i686", 
-            "-fno-pic", 
-            "-fno-inline", 
-            "-fno-stack-protector", 
-            "-nostdinc", 
-            "-I../..", 
-            "-I../../lib", 
-            "-I../../lib/user", 
-            "-I.", 
-            "-Wall", 
-            "-W", 
-            "-Wstrict-prototypes", 
-            "-Wmissing-prototypes", 
-            "-Wsystem-headers", 
-            "-o", 
             "tests/userprog/exec-bound-2.o", 
             "../../tests/userprog/exec-bound-2.c"
         ], 
@@ -2786,11 +2756,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/filesys/base/child-syn-read.o", 
-            "../../tests/filesys/base/child-syn-read.c"
+            "tests/userprog/read-bad-fd.o", 
+            "../../tests/userprog/read-bad-fd.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/filesys/base/child-syn-read.c"
+        "file": "../../tests/userprog/read-bad-fd.c"
     }, 
     {
         "arguments": [
@@ -2899,11 +2869,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/wait-killed.o", 
-            "../../tests/userprog/wait-killed.c"
+            "tests/filesys/base/lg-seq-random.o", 
+            "../../tests/filesys/base/lg-seq-random.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/wait-killed.c"
+        "file": "../../tests/filesys/base/lg-seq-random.c"
     }, 
     {
         "arguments": [
@@ -2985,11 +2955,11 @@
             "-DUSERPROG", 
             "-DFILESYS", 
             "-o", 
-            "userprog/exception.o", 
-            "../exception.c"
+            "devices/timer.o", 
+            "../../devices/timer.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../exception.c"
+        "file": "../../devices/timer.c"
     }, 
     {
         "arguments": [
@@ -3013,11 +2983,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/lib.o", 
-            "../../tests/lib.c"
+            "tests/userprog/close-normal.o", 
+            "../../tests/userprog/close-normal.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/lib.c"
+        "file": "../../tests/userprog/close-normal.c"
     }, 
     {
         "arguments": [
@@ -3070,11 +3040,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/wait-bad-pid.o", 
-            "../../tests/userprog/wait-bad-pid.c"
+            "tests/userprog/exit.o", 
+            "../../tests/userprog/exit.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/wait-bad-pid.c"
+        "file": "../../tests/userprog/exit.c"
     }, 
     {
         "arguments": [
@@ -3098,11 +3068,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/close-bad-fd.o", 
-            "../../tests/userprog/close-bad-fd.c"
+            "tests/userprog/open-null.o", 
+            "../../tests/userprog/open-null.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/close-bad-fd.c"
+        "file": "../../tests/userprog/open-null.c"
     }, 
     {
         "arguments": [
@@ -3161,6 +3131,35 @@
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
         "file": "../gdt.c"
+    }, 
+    {
+        "arguments": [
+            "cc", 
+            "-c", 
+            "-m32", 
+            "-ggdb3", 
+            "-O0", 
+            "-march=i686", 
+            "-fno-pic", 
+            "-fno-inline", 
+            "-fno-stack-protector", 
+            "-nostdinc", 
+            "-I../..", 
+            "-I../../lib", 
+            "-I../../lib/kernel", 
+            "-Wall", 
+            "-W", 
+            "-Wstrict-prototypes", 
+            "-Wmissing-prototypes", 
+            "-Wsystem-headers", 
+            "-DUSERPROG", 
+            "-DFILESYS", 
+            "-o", 
+            "devices/shutdown.o", 
+            "../../devices/shutdown.c"
+        ], 
+        "directory": "/home/vagrant/code/group/src/userprog/build", 
+        "file": "../../devices/shutdown.c"
     }, 
     {
         "arguments": [
@@ -3268,11 +3267,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/fp-kernel-e.o", 
-            "../../tests/userprog/fp-kernel-e.c"
+            "tests/filesys/base/child-syn-read.o", 
+            "../../tests/filesys/base/child-syn-read.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/fp-kernel-e.c"
+        "file": "../../tests/filesys/base/child-syn-read.c"
     }, 
     {
         "arguments": [
@@ -3592,35 +3591,6 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/kernel", 
-            "-Wall", 
-            "-W", 
-            "-Wstrict-prototypes", 
-            "-Wmissing-prototypes", 
-            "-Wsystem-headers", 
-            "-DUSERPROG", 
-            "-DFILESYS", 
-            "-o", 
-            "devices/timer.o", 
-            "../../devices/timer.c"
-        ], 
-        "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../devices/timer.c"
-    }, 
-    {
-        "arguments": [
-            "cc", 
-            "-c", 
-            "-m32", 
-            "-ggdb3", 
-            "-O0", 
-            "-march=i686", 
-            "-fno-pic", 
-            "-fno-inline", 
-            "-fno-stack-protector", 
-            "-nostdinc", 
-            "-I../..", 
-            "-I../../lib", 
             "-I../../lib/user", 
             "-I.", 
             "-Wall", 
@@ -3649,19 +3619,20 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/user", 
-            "-I.", 
+            "-I../../lib/kernel", 
             "-Wall", 
             "-W", 
             "-Wstrict-prototypes", 
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
+            "-DUSERPROG", 
+            "-DFILESYS", 
             "-o", 
-            "tests/userprog/read-boundary.o", 
-            "../../tests/userprog/read-boundary.c"
+            "userprog/syscall.o", 
+            "../syscall.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/read-boundary.c"
+        "file": "../syscall.c"
     }, 
     {
         "arguments": [
@@ -3884,11 +3855,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/open-normal.o", 
-            "../../tests/userprog/open-normal.c"
+            "tests/userprog/read-normal.o", 
+            "../../tests/userprog/read-normal.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/open-normal.c"
+        "file": "../../tests/userprog/read-normal.c"
     }, 
     {
         "arguments": [
@@ -4026,11 +3997,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/filesys/base/lg-seq-random.o", 
-            "../../tests/filesys/base/lg-seq-random.c"
+            "tests/userprog/wait-killed.o", 
+            "../../tests/userprog/wait-killed.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/filesys/base/lg-seq-random.c"
+        "file": "../../tests/userprog/wait-killed.c"
     }, 
     {
         "arguments": [
@@ -4082,11 +4053,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/open-null.o", 
-            "../../tests/userprog/open-null.c"
+            "tests/userprog/close-bad-fd.o", 
+            "../../tests/userprog/close-bad-fd.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/open-null.c"
+        "file": "../../tests/userprog/close-bad-fd.c"
     }, 
     {
         "arguments": [
@@ -4131,19 +4102,20 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/user", 
-            "-I.", 
+            "-I../../lib/kernel", 
             "-Wall", 
             "-W", 
             "-Wstrict-prototypes", 
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
+            "-DUSERPROG", 
+            "-DFILESYS", 
             "-o", 
-            "tests/userprog/create-null.o", 
-            "../../tests/userprog/create-null.c"
+            "lib/kernel/hash.o", 
+            "../../lib/kernel/hash.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/create-null.c"
+        "file": "../../lib/kernel/hash.c"
     }, 
     {
         "arguments": [
@@ -4183,11 +4155,11 @@
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
             "-o", 
-            "tests/userprog/wait-twice.o", 
-            "../../tests/userprog/wait-twice.c"
+            "tests/userprog/fp-kernel-e.o", 
+            "../../tests/userprog/fp-kernel-e.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../tests/userprog/wait-twice.c"
+        "file": "../../tests/userprog/fp-kernel-e.c"
     }, 
     {
         "arguments": [
@@ -4203,20 +4175,19 @@
             "-nostdinc", 
             "-I../..", 
             "-I../../lib", 
-            "-I../../lib/kernel", 
+            "-I../../lib/user", 
+            "-I.", 
             "-Wall", 
             "-W", 
             "-Wstrict-prototypes", 
             "-Wmissing-prototypes", 
             "-Wsystem-headers", 
-            "-DUSERPROG", 
-            "-DFILESYS", 
             "-o", 
-            "devices/rtc.o", 
-            "../../devices/rtc.c"
+            "tests/filesys/base/sm-random.o", 
+            "../../tests/filesys/base/sm-random.c"
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
-        "file": "../../devices/rtc.c"
+        "file": "../../tests/filesys/base/sm-random.c"
     }, 
     {
         "arguments": [
@@ -4321,6 +4292,35 @@
         ], 
         "directory": "/home/vagrant/code/group/src/userprog/build", 
         "file": "../../tests/main.c"
+    }, 
+    {
+        "arguments": [
+            "cc", 
+            "-c", 
+            "-m32", 
+            "-ggdb3", 
+            "-O0", 
+            "-march=i686", 
+            "-fno-pic", 
+            "-fno-inline", 
+            "-fno-stack-protector", 
+            "-nostdinc", 
+            "-I../..", 
+            "-I../../lib", 
+            "-I../../lib/kernel", 
+            "-Wall", 
+            "-W", 
+            "-Wstrict-prototypes", 
+            "-Wmissing-prototypes", 
+            "-Wsystem-headers", 
+            "-DUSERPROG", 
+            "-DFILESYS", 
+            "-o", 
+            "lib/stdio.o", 
+            "../../lib/stdio.c"
+        ], 
+        "directory": "/home/vagrant/code/group/src/userprog/build", 
+        "file": "../../lib/stdio.c"
     }, 
     {
         "arguments": [
