@@ -46,33 +46,92 @@ void userprog_init(void) {
     ASSERT(success);
 }
 
+struct arguments {
+    char* fn_copy;
+    char** argv;
+    int argc;
+};
+
+static void free_args(struct arguments* args) {
+    for (int i = 0; i < args->argc; i++) {
+        free(args->argv[i]);
+    }
+    free(args->argv);
+}
+
+static void push_arg(struct arguments* args, char* arg) {
+    args->argv = (char**)realloc(args->argv, sizeof(char*) * (args->argc + 1));
+    if (args->argv == NULL) {
+        printf("Realloc failed.");
+        process_exit();
+    }
+    args->argv[args->argc] = arg;
+    args->argc++;
+}
+
+static void parse_to(struct arguments* args, const char* task) {
+    args->argv = NULL;
+    args->argc = 0;
+
+    char *token = NULL, *psave = NULL;
+    int len = strlen(task);
+    char* str = malloc(len + 1);
+    if (str == NULL) {
+        printf("Malloc failed.");
+        process_exit();
+    }
+    strlcpy(str, task, len + 1);
+
+    token = strtok_r(str, " ", &psave);
+    while (token != NULL) {
+        len = strlen(token);
+        char* arg = malloc(len + 1);
+        if (arg == NULL) {
+            printf("Malloc failed.");
+            process_exit();
+        }
+        strlcpy(arg, token, len + 1);
+        push_arg(args, arg);
+        token = strtok_r(NULL, " ", &psave);
+    }
+    free(str);
+}
+
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
    process id, or TID_ERROR if the thread cannot be created. */
-pid_t process_execute(const char* file_name) {
-    char* fn_copy;
+pid_t process_execute(const char* task) {
+    struct arguments* args = malloc(sizeof(struct arguments));
+    if (args == NULL) {
+        printf("Malloc failed.");
+        process_exit();
+    }
+    parse_to(args, task);
+
+    const char* file_name = args->argv[0];
     tid_t tid;
 
     sema_init(&temporary, 0);
     /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
-    fn_copy = palloc_get_page(0);
-    if (fn_copy == NULL)
+    args->fn_copy = palloc_get_page(0);
+    if (args->fn_copy == NULL)
         return TID_ERROR;
-    strlcpy(fn_copy, file_name, PGSIZE);
+    strlcpy(args->fn_copy, file_name, PGSIZE);
 
     /* Create a new thread to execute FILE_NAME. */
-    tid = thread_create(file_name, PRI_DEFAULT, start_process, fn_copy);
+    tid = thread_create(file_name, PRI_DEFAULT, start_process, args);
     if (tid == TID_ERROR)
-        palloc_free_page(fn_copy);
+        palloc_free_page(args->fn_copy);
     return tid;
 }
 
 /* A thread function that loads a user process and starts it
    running. */
-static void start_process(void* file_name_) {
-    char* file_name = (char*)file_name_;
+static void start_process(void* aux) {
+    struct arguments* args = (struct arguments*)aux;
+    char* file_name = (char*)args->fn_copy;
     struct thread* t = thread_current();
     struct intr_frame if_;
     bool success, pcb_success;
@@ -119,12 +178,55 @@ static void start_process(void* file_name_) {
         thread_exit();
     }
 
+    /* Simulate the Program Startup. */
+    char** argv = malloc(sizeof(char*) * args->argc);
+    if (argv == NULL) {
+        printf("Malloc failed.");
+        thread_exit();
+    }
+
+    int total_len = 0;
+    for (int i = args->argc - 1; i >= 0; --i) {
+        int len = strlen(args->argv[i]);
+        if_.esp -= len + 1;
+        total_len += len + 1;
+        memcpy(if_.esp, args->argv[i], len + 1);
+        argv[i] = if_.esp;
+    }
+    argv[args->argc] = 0;
+
+    total_len += (args->argc + 3) * 4;
+    if (total_len % 16 != 0) {
+        total_len = 16 - (total_len % 16);
+    } else {
+        total_len = 0;
+    }
+    if_.esp -= total_len;
+    memset(if_.esp, 0, total_len);
+
+    for (int i = args->argc; i >= 0; --i) {
+        if_.esp -= 4;
+        memcpy(if_.esp, &argv[i], 4);
+    }
+    free(argv);
+
+    char* addr = if_.esp;
+    if_.esp -= 4;
+    memcpy(if_.esp, &addr, 4);
+    if_.esp -= 4;
+    memcpy(if_.esp, &args->argc, 4);
+    free_args(args);
+
     /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
      threads/intr-stubs.S).  Because intr_exit takes all of its
      arguments on the stack in the form of a `struct intr_frame',
      we just point the stack pointer (%esp) to our stack frame
      and jump to it. */
+    if_.esp -= 4;
+    // char buf[100];
+    // hex_dump((unsigned int)if_.esp, buf, 100, true);
+    // printf("%s", buf);
     asm volatile("movl %0, %%esp; jmp intr_exit" : : "g"(&if_) : "memory");
     NOT_REACHED();
 }
