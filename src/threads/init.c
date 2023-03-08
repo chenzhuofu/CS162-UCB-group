@@ -312,7 +312,8 @@ static void run_task(char** argv) {
 
     printf("Executing '%s':\n", task);
 #ifdef USERPROG
-    process_wait(process_execute(task));
+    pid_t pid = process_execute(task);
+    process_wait(pid);
 #endif
     printf("Execution of '%s' complete.\n", task);
 }
@@ -393,47 +394,46 @@ static void run_actions(char** argv) {
 /* Prints a kernel command line help message and powers off the
    machine. */
 static void usage(void) {
-    printf(
-        "\nCommand line syntax: [OPTION...] [ACTION...]\n"
-        "Options must precede actions.\n"
-        "Actions are executed in the order specified.\n"
-        "\nAvailable actions:\n"
+    printf("\nCommand line syntax: [OPTION...] [ACTION...]\n"
+           "Options must precede actions.\n"
+           "Actions are executed in the order specified.\n"
+           "\nAvailable actions:\n"
 #ifdef USERPROG
-        "  run 'PROG [ARG...]' Run PROG and wait for it to complete.\n"
-        "  rukt TEST          Run userprog kernel test TEST.\n"
+           "  run 'PROG [ARG...]' Run PROG and wait for it to complete.\n"
+           "  rukt TEST          Run userprog kernel test TEST.\n"
 #endif
 #ifdef THREADS
-        "  rtkt TEST          Run threads kernel test TEST.\n"
+           "  rtkt TEST          Run threads kernel test TEST.\n"
 #endif
 #ifdef FILESYS
-        "  ls                 List files in the root directory.\n"
-        "  cat FILE           Print FILE to the console.\n"
-        "  rm FILE            Delete FILE.\n"
-        "Use these actions indirectly via `pintos' -g and -p options:\n"
-        "  extract            Untar from scratch device into file system.\n"
-        "  append FILE        Append FILE to tar file on scratch device.\n"
+           "  ls                 List files in the root directory.\n"
+           "  cat FILE           Print FILE to the console.\n"
+           "  rm FILE            Delete FILE.\n"
+           "Use these actions indirectly via `pintos' -g and -p options:\n"
+           "  extract            Untar from scratch device into file system.\n"
+           "  append FILE        Append FILE to tar file on scratch device.\n"
 #endif
-        "\nOptions:\n"
-        "  -h                 Print this help message and power off.\n"
-        "  -q                 Power off VM after actions or on panic.\n"
-        "  -r                 Reboot after actions.\n"
+           "\nOptions:\n"
+           "  -h                 Print this help message and power off.\n"
+           "  -q                 Power off VM after actions or on panic.\n"
+           "  -r                 Reboot after actions.\n"
 #ifdef FILESYS
-        "  -f                 Format file system device during startup.\n"
-        "  -filesys=BDEV      Use BDEV for file system instead of default.\n"
-        "  -scratch=BDEV      Use BDEV for scratch instead of default.\n"
+           "  -f                 Format file system device during startup.\n"
+           "  -filesys=BDEV      Use BDEV for file system instead of default.\n"
+           "  -scratch=BDEV      Use BDEV for scratch instead of default.\n"
 #ifdef VM
-        "  -swap=BDEV         Use BDEV for swap instead of default.\n"
+           "  -swap=BDEV         Use BDEV for swap instead of default.\n"
 #endif // VM
 #endif // FILESYS
-        "  -rs=SEED           Set random number seed to SEED.\n"
-        "  -sched-fair        Use alternate non-strict priority scheduler. Mutually exclusive "
-        "with \"-sched-mlfqs\", \"-sched-prio\".\n"
-        "  -sched-mlfqs       Use multi-level feedback queue scheduler. Mutually exclusive with "
-        "\"-sched-fair\", \"-sched-prio\".\n"
-        "  -sched-prio        Use strict-priority round-robin scheduler. Mutually exclusive with "
-        "\"-sched-fair\", \"-sched-mlfqs\".\n"
+           "  -rs=SEED           Set random number seed to SEED.\n"
+           "  -sched-fair        Use alternate non-strict priority scheduler. Mutually exclusive "
+           "with \"-sched-mlfqs\", \"-sched-prio\".\n"
+           "  -sched-mlfqs       Use multi-level feedback queue scheduler. Mutually exclusive with "
+           "\"-sched-fair\", \"-sched-prio\".\n"
+           "  -sched-prio        Use strict-priority round-robin scheduler. Mutually exclusive with "
+           "\"-sched-fair\", \"-sched-mlfqs\".\n"
 #ifdef USERPROG
-        "  -ul=COUNT          Limit user memory to COUNT pages.\n"
+           "  -ul=COUNT          Limit user memory to COUNT pages.\n"
 #endif // USERPROG
     );
     shutdown_power_off();

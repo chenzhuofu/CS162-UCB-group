@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "list.h"
 #include "userprog/gdt.h"
 #include "userprog/pagedir.h"
 #include "userprog/tss.h"
@@ -21,6 +22,7 @@
 #include "threads/vaddr.h"
 
 static struct semaphore temporary;
+process_status_list_t processes;
 static thread_func start_process NO_RETURN;
 static thread_func start_pthread NO_RETURN;
 static bool load(const char* file_name, void (**eip)(void), void** esp);
@@ -41,6 +43,15 @@ void userprog_init(void) {
      can come at any time and activate our pagedir */
     t->pcb = calloc(sizeof(struct process), 1);
     success = t->pcb != NULL;
+
+    if (success) {
+        t->pcb->main_thread = t;
+        t->pcb->children = (child_process_list_t*)malloc(sizeof(child_process_list_t));
+        success = t->pcb->children != NULL;
+        if (success) {
+            list_init(t->pcb->children);
+        }
+    }
 
     /* Kill the kernel if we did not succeed */
     ASSERT(success);
@@ -121,9 +132,38 @@ pid_t process_execute(const char* task) {
     strlcpy(args->fn_copy, file_name, PGSIZE);
 
     /* Create a new thread to execute FILE_NAME. */
-    tid = thread_create(file_name, PRI_DEFAULT, start_process, args);
-    if (tid == TID_ERROR)
+    if (filesys_open(file_name) == NULL) {
+        tid = -1;
+    } else {
+        tid = thread_create(file_name, PRI_DEFAULT, start_process, args);
+    }
+
+    if (tid == TID_ERROR) {
         palloc_free_page(args->fn_copy);
+    } else {
+        // Initialize the status of process
+        process_status_t* status = (process_status_t*)malloc(sizeof(process_status_t));
+        if (status != NULL) {
+            status->pid = tid;
+            status->exited = 0;
+            status->exit_status = 0;
+            list_push_back(&processes, &(status->elem));
+        } else {
+            printf("Malloc failed.");
+            process_exit();
+        }
+
+        // Push pcb into parent child_list
+        struct process* pcb = thread_current()->pcb;
+        child_process_t* child = (child_process_t*)malloc(sizeof(child_process_t));
+        if (child != NULL) {
+            child->status = status;
+            list_push_back(pcb->children, &(child->elem));
+        } else {
+            printf("Malloc failed.");
+            process_exit();
+        }
+    }
     return tid;
 }
 
@@ -150,6 +190,23 @@ static void start_process(void* aux) {
         // Continue initializing the PCB as normal
         t->pcb->main_thread = t;
         strlcpy(t->pcb->process_name, t->name, sizeof t->name);
+
+        // Initialize the list of child processes
+        t->pcb->children = (child_process_list_t*)malloc(sizeof(child_process_list_t));
+        if (t->pcb->children == NULL) {
+            printf("Malloc failed.");
+            process_exit();
+        }
+        list_init(t->pcb->children);
+
+        // Initialize the list of files
+        t->pcb->fds = (file_descriptor_list_t*)malloc(sizeof(file_descriptor_list_t));
+        if (t->pcb->fds == NULL) {
+            printf("Malloc failed.");
+            process_exit();
+        }
+        list_init(t->pcb->fds);
+        t->pcb->next_fd = 2;
     }
 
     /* Initialize interrupt frame and load executable. */
@@ -224,9 +281,6 @@ static void start_process(void* aux) {
      we just point the stack pointer (%esp) to our stack frame
      and jump to it. */
     if_.esp -= 4;
-    // char buf[100];
-    // hex_dump((unsigned int)if_.esp, buf, 100, true);
-    // printf("%s", buf);
     asm volatile("movl %0, %%esp; jmp intr_exit" : : "g"(&if_) : "memory");
     NOT_REACHED();
 }
@@ -240,9 +294,36 @@ static void start_process(void* aux) {
 
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
-int process_wait(pid_t child_pid UNUSED) {
-    sema_down(&temporary);
-    return 0;
+int process_wait(pid_t child_pid) {
+    child_process_list_t* children = thread_current()->pcb->children;
+    process_status_t* wait_process = NULL;
+    for (struct list_elem* e = list_begin(children); e != list_end(children); e = list_next(e)) {
+        child_process_t* child = list_entry(e, child_process_t, elem);
+        if (child->status->pid == child_pid) {
+            wait_process = child->status;
+            list_remove(e);
+            free(child);
+            break;
+        }
+    }
+    if (wait_process == NULL) {
+        return -1;
+    }
+
+    while (!sema_try_down(&temporary)) {
+        thread_yield();
+    }
+    while (wait_process->exited == 0) {
+        sema_up(&temporary);
+        thread_yield();
+        while (!sema_try_down(&temporary)) {
+            thread_yield();
+        }
+    }
+    int exit_status = wait_process->exit_status;
+    list_remove(&(wait_process->elem));
+    free(wait_process);
+    return exit_status;
 }
 
 /* Free the current process's resources. */
@@ -270,6 +351,32 @@ void process_exit(void) {
         cur->pcb->pagedir = NULL;
         pagedir_activate(NULL);
         pagedir_destroy(pd);
+    }
+
+    /* Free the children status of this process */
+    child_process_list_t* children = cur->pcb->children;
+    if (children != NULL) {
+        while (!list_empty(children)) {
+            struct list_elem* e = list_pop_front(children);
+            child_process_t* child = list_entry(e, child_process_t, elem);
+            process_status_t* status = child->status;
+            list_remove(&(status->elem));
+            free(status);
+            list_remove(e);
+            free(child);
+        }
+    }
+
+    /* Free the file descriptors of this process */
+    file_descriptor_list_t* fds = cur->pcb->fds;
+    if (fds != NULL) {
+        while (!list_empty(fds)) {
+            struct list_elem* e = list_pop_front(fds);
+            file_descriptor_t* fd = list_entry(e, file_descriptor_t, elem);
+            file_close(fd->file);
+            list_remove(e);
+            free(fd);
+        }
     }
 
     /* Free the PCB of this process and kill this thread
@@ -363,8 +470,7 @@ struct Elf32_Phdr {
 
 static bool setup_stack(void** esp);
 static bool validate_segment(const struct Elf32_Phdr*, struct file*);
-static bool load_segment(struct file* file, off_t ofs, uint8_t* upage, uint32_t read_bytes,
-                         uint32_t zero_bytes, bool writable);
+static bool load_segment(struct file* file, off_t ofs, uint8_t* upage, uint32_t read_bytes, uint32_t zero_bytes, bool writable);
 
 /* Loads an ELF executable from FILE_NAME into the current thread.
    Stores the executable's entry point into *EIP
@@ -392,10 +498,8 @@ bool load(const char* file_name, void (**eip)(void), void** esp) {
     }
 
     /* Read and verify executable header. */
-    if (file_read(file, &ehdr, sizeof ehdr) != sizeof ehdr ||
-        memcmp(ehdr.e_ident, "\177ELF\1\1\1", 7) || ehdr.e_type != 2 || ehdr.e_machine != 3 ||
-        ehdr.e_version != 1 || ehdr.e_phentsize != sizeof(struct Elf32_Phdr) ||
-        ehdr.e_phnum > 1024) {
+    if (file_read(file, &ehdr, sizeof ehdr) != sizeof ehdr || memcmp(ehdr.e_ident, "\177ELF\1\1\1", 7) || ehdr.e_type != 2 ||
+        ehdr.e_machine != 3 || ehdr.e_version != 1 || ehdr.e_phentsize != sizeof(struct Elf32_Phdr) || ehdr.e_phnum > 1024) {
         printf("load: %s: error loading executable\n", file_name);
         goto done;
     }
@@ -442,8 +546,7 @@ bool load(const char* file_name, void (**eip)(void), void** esp) {
                         read_bytes = 0;
                         zero_bytes = ROUND_UP(page_offset + phdr.p_memsz, PGSIZE);
                     }
-                    if (!load_segment(file, file_page, (void*)mem_page, read_bytes, zero_bytes,
-                                      writable))
+                    if (!load_segment(file, file_page, (void*)mem_page, read_bytes, zero_bytes, writable))
                         goto done;
                 } else
                     goto done;
@@ -527,8 +630,7 @@ static bool validate_segment(const struct Elf32_Phdr* phdr, struct file* file) {
 
    Return true if successful, false if a memory allocation error
    or disk read error occurs. */
-static bool load_segment(struct file* file, off_t ofs, uint8_t* upage, uint32_t read_bytes,
-                         uint32_t zero_bytes, bool writable) {
+static bool load_segment(struct file* file, off_t ofs, uint8_t* upage, uint32_t read_bytes, uint32_t zero_bytes, bool writable) {
     ASSERT((read_bytes + zero_bytes) % PGSIZE == 0);
     ASSERT(pg_ofs(upage) == 0);
     ASSERT(ofs % PGSIZE == 0);
@@ -598,8 +700,7 @@ static bool install_page(void* upage, void* kpage, bool writable) {
 
     /* Verify that there's not already a page at that virtual
      address, then map our page there. */
-    return (pagedir_get_page(t->pcb->pagedir, upage) == NULL &&
-            pagedir_set_page(t->pcb->pagedir, upage, kpage, writable));
+    return (pagedir_get_page(t->pcb->pagedir, upage) == NULL && pagedir_set_page(t->pcb->pagedir, upage, kpage, writable));
 }
 
 /* Returns true if t is the main thread of the process p */
