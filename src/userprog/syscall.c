@@ -16,12 +16,14 @@
 #include "lib/kernel/list.h"
 
 extern process_status_list_t processes;
+extern struct lock file_operations_lock;
 
 static void syscall_handler(struct intr_frame*);
 
 void syscall_init(void) {
     intr_register_int(0x30, 3, INTR_ON, syscall_handler, "syscall");
     list_init(&processes);
+    lock_init(&file_operations_lock);
 }
 
 static void verify_vaddr(uint32_t*, void*);
@@ -80,24 +82,34 @@ Check_args1:
 
         case SYS_REMOVE:
             verify_string(cur->pcb->pagedir, (char*)args[1]);
+            lock_acquire(&file_operations_lock);
             f->eax = filesys_remove((char*)args[1]);
+            lock_release(&file_operations_lock);
             break;
 
         case SYS_OPEN:
             verify_string(cur->pcb->pagedir, (char*)args[1]);
+            lock_acquire(&file_operations_lock);
             f->eax = sys_open((char*)args[1]);
+            lock_release(&file_operations_lock);
             break;
 
         case SYS_FILESIZE:
+            lock_acquire(&file_operations_lock);
             f->eax = sys_filesize(args[1]);
+            lock_release(&file_operations_lock);
             break;
 
         case SYS_TELL:
+            lock_acquire(&file_operations_lock);
             f->eax = sys_tell(args[1]);
+            lock_release(&file_operations_lock);
             break;
 
         case SYS_CLOSE:
+            lock_acquire(&file_operations_lock);
             sys_close(args[1]);
+            lock_release(&file_operations_lock);
             break;
 
         case SYS_PRACTICE:
@@ -115,10 +127,14 @@ Check_args2:
     switch (args[0]) {
         case SYS_CREATE:
             verify_string(cur->pcb->pagedir, (char*)args[1]);
+            lock_acquire(&file_operations_lock);
             f->eax = filesys_create((char*)args[1], args[2]);
+            lock_release(&file_operations_lock);
             break;
         case SYS_SEEK:
+            lock_acquire(&file_operations_lock);
             sys_seek(args[1], args[2]);
+            lock_release(&file_operations_lock);
             break;
         default:
             goto Check_args3;
@@ -130,12 +146,16 @@ Check_args3:
     switch (args[0]) {
         case SYS_READ:
             verify_block(cur->pcb->pagedir, (uint8_t*)args[2], args[3]);
+            lock_acquire(&file_operations_lock);
             f->eax = sys_read(args[1], (uint8_t*)args[2], args[3]);
+            lock_release(&file_operations_lock);
             break;
 
         case SYS_WRITE:
             verify_block(cur->pcb->pagedir, (uint8_t*)args[2], args[3]);
+            lock_acquire(&file_operations_lock);
             f->eax = sys_write(args[1], (uint8_t*)args[2], args[3]);
+            lock_release(&file_operations_lock);
             break;
 
         default:
@@ -252,7 +272,7 @@ static void sys_seek(int fd, unsigned position) {
     }
 }
 
-static unsigned sys_tell(int fd){
+static unsigned sys_tell(int fd) {
     file_descriptor_t* f = get_file_descriptor(fd);
     if (f == NULL) {
         return -1;
@@ -261,11 +281,11 @@ static unsigned sys_tell(int fd){
     }
 }
 
-static void sys_close(int fd){
+static void sys_close(int fd) {
     file_descriptor_t* f = get_file_descriptor(fd);
     if (f != NULL) {
         file_close(f->file);
         list_remove(&(f->elem));
-        free(f);  
-    } 
+        free(f);
+    }
 }

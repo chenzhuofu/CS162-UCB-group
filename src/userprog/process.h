@@ -50,6 +50,7 @@ struct process {
     char process_name[16];      /* Name of the main thread */
     struct thread* main_thread; /* Pointer to main thread */
 
+    struct file* open_file;
     child_process_list_t* children; /* List of child processes */
     file_descriptor_list_t* fds;  /* List of open files */
     int next_fd;               

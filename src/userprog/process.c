@@ -23,6 +23,7 @@
 
 static struct semaphore temporary;
 process_status_list_t processes;
+struct lock file_operations_lock;
 static thread_func start_process NO_RETURN;
 static thread_func start_pthread NO_RETURN;
 static bool load(const char* file_name, void (**eip)(void), void** esp);
@@ -61,6 +62,7 @@ struct arguments {
     char* fn_copy;
     char** argv;
     int argc;
+    struct file* open_file;
 };
 
 static void free_args(struct arguments* args) {
@@ -132,15 +134,21 @@ pid_t process_execute(const char* task) {
     strlcpy(args->fn_copy, file_name, PGSIZE);
 
     /* Create a new thread to execute FILE_NAME. */
-    if (filesys_open(file_name) == NULL) {
+    lock_acquire(&file_operations_lock);
+    struct file* open_file = filesys_open(file_name);
+    lock_release(&file_operations_lock);
+    if (open_file == NULL) {
         tid = -1;
     } else {
+        args->open_file = open_file;
         tid = thread_create(file_name, PRI_DEFAULT, start_process, args);
     }
 
     if (tid == TID_ERROR) {
         palloc_free_page(args->fn_copy);
     } else {
+        struct process* pcb = thread_current()->pcb;
+
         // Initialize the status of process
         process_status_t* status = (process_status_t*)malloc(sizeof(process_status_t));
         if (status != NULL) {
@@ -154,7 +162,6 @@ pid_t process_execute(const char* task) {
         }
 
         // Push pcb into parent child_list
-        struct process* pcb = thread_current()->pcb;
         child_process_t* child = (child_process_t*)malloc(sizeof(child_process_t));
         if (child != NULL) {
             child->status = status;
@@ -191,6 +198,9 @@ static void start_process(void* aux) {
         t->pcb->main_thread = t;
         strlcpy(t->pcb->process_name, t->name, sizeof t->name);
 
+        t->pcb->open_file = args->open_file;
+        file_deny_write(t->pcb->open_file);
+
         // Initialize the list of child processes
         t->pcb->children = (child_process_list_t*)malloc(sizeof(child_process_list_t));
         if (t->pcb->children == NULL) {
@@ -215,7 +225,9 @@ static void start_process(void* aux) {
         if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
         if_.cs = SEL_UCSEG;
         if_.eflags = FLAG_IF | FLAG_MBS;
+        lock_acquire(&file_operations_lock);
         success = load(file_name, &if_.eip, &if_.esp);
+        lock_release(&file_operations_lock);
     }
 
     /* Handle failure with succesful PCB malloc. Must free the PCB */
@@ -352,6 +364,9 @@ void process_exit(void) {
         pagedir_activate(NULL);
         pagedir_destroy(pd);
     }
+
+    /* Close the open file */
+    file_close(cur->pcb->open_file);
 
     /* Free the children status of this process */
     child_process_list_t* children = cur->pcb->children;
