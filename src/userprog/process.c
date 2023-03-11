@@ -63,14 +63,10 @@ struct arguments {
     char** argv;
     int argc;
     struct file* open_file;
+    struct process* parent_pcb;
+    struct semaphore sema;
+    int success;
 };
-
-static void free_args(struct arguments* args) {
-    for (int i = 0; i < args->argc; i++) {
-        free(args->argv[i]);
-    }
-    free(args->argv);
-}
 
 static void push_arg(struct arguments* args, char* arg) {
     args->argv = (char**)realloc(args->argv, sizeof(char*) * (args->argc + 1));
@@ -133,6 +129,8 @@ pid_t process_execute(const char* task) {
         return TID_ERROR;
     strlcpy(args->fn_copy, file_name, PGSIZE);
 
+    args->parent_pcb = thread_current()->pcb;
+
     /* Create a new thread to execute FILE_NAME. */
     lock_acquire(&file_operations_lock);
     struct file* open_file = filesys_open(file_name);
@@ -141,36 +139,19 @@ pid_t process_execute(const char* task) {
         tid = -1;
     } else {
         args->open_file = open_file;
+        sema_init(&(args->sema), 0);
         tid = thread_create(file_name, PRI_DEFAULT, start_process, args);
-    }
-
-    if (tid == TID_ERROR) {
-        palloc_free_page(args->fn_copy);
-    } else {
-        struct process* pcb = thread_current()->pcb;
-
-        // Initialize the status of process
-        process_status_t* status = (process_status_t*)malloc(sizeof(process_status_t));
-        if (status != NULL) {
-            status->pid = tid;
-            status->exited = 0;
-            status->exit_status = 0;
-            list_push_back(&processes, &(status->elem));
-        } else {
-            printf("Malloc failed.");
-            process_exit();
+        while (!sema_try_down(&(args->sema))) {
+            thread_yield();
         }
-
-        // Push pcb into parent child_list
-        child_process_t* child = (child_process_t*)malloc(sizeof(child_process_t));
-        if (child != NULL) {
-            child->status = status;
-            list_push_back(pcb->children, &(child->elem));
-        } else {
-            printf("Malloc failed.");
-            process_exit();
+        if (args->success == 0) {
+            tid = -1;
         }
     }
+
+    // if (tid == TID_ERROR) {
+    //     palloc_free_page(args->fn_copy);
+    // }
     return tid;
 }
 
@@ -217,6 +198,26 @@ static void start_process(void* aux) {
         }
         list_init(t->pcb->fds);
         t->pcb->next_fd = 2;
+
+        // Initialize the status of process
+        process_status_t* status = (process_status_t*)malloc(sizeof(process_status_t));
+        if (status == NULL) {
+            printf("Malloc failed.");
+            process_exit();
+        }
+        status->pid = get_pid(t->pcb);
+        status->exited = 0;
+        status->exit_status = 0;
+        list_push_back(&processes, &(status->elem));
+
+        // Push pcb into parent child_list
+        child_process_t* child = (child_process_t*)malloc(sizeof(child_process_t));
+        if (child == NULL) {
+            printf("Malloc failed.");
+            process_exit();
+        }
+        child->status = status;
+        list_push_back(args->parent_pcb->children, &(child->elem));
     }
 
     /* Initialize interrupt frame and load executable. */
@@ -242,10 +243,12 @@ static void start_process(void* aux) {
         free(pcb_to_free);
     }
 
+    args->success = success;
+    sema_up(&(args->sema));
+
     /* Clean up. Exit on failure or jump to userspace */
     palloc_free_page(file_name);
     if (!success) {
-        sema_up(&temporary);
         thread_exit();
     }
 
@@ -286,7 +289,6 @@ static void start_process(void* aux) {
     memcpy(if_.esp, &addr, 4);
     if_.esp -= 4;
     memcpy(if_.esp, &args->argc, 4);
-    free_args(args);
 
     /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -334,6 +336,7 @@ int process_wait(pid_t child_pid) {
             thread_yield();
         }
     }
+
     int exit_status = wait_process->exit_status;
     list_remove(&(wait_process->elem));
     free(wait_process);
