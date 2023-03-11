@@ -225,6 +225,8 @@ static void start_process(void* aux) {
         if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
         if_.cs = SEL_UCSEG;
         if_.eflags = FLAG_IF | FLAG_MBS;
+        // asm("fninit");
+        asm("fsave (%0)" : : "g"(&if_.fpu));
         lock_acquire(&file_operations_lock);
         success = load(file_name, &if_.eip, &if_.esp);
         lock_release(&file_operations_lock);

@@ -14,6 +14,7 @@
 #include "userprog/pagedir.h"
 #include "devices/shutdown.h"
 #include "lib/kernel/list.h"
+#include "lib/float.h"
 
 extern process_status_list_t processes;
 extern struct lock file_operations_lock;
@@ -114,6 +115,10 @@ Check_args1:
 
         case SYS_PRACTICE:
             f->eax = args[1] + 1;
+            break;
+
+        case SYS_COMPUTE_E:
+            f->eax = sys_sum_to_e(args[1]);
             break;
 
         default:
