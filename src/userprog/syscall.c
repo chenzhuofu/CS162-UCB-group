@@ -16,6 +16,7 @@
 #include "lib/kernel/list.h"
 #include "lib/float.h"
 
+extern struct semaphore temporary;
 extern process_status_list_t processes;
 extern struct lock file_operations_lock;
 
@@ -25,6 +26,7 @@ void syscall_init(void) {
     intr_register_int(0x30, 3, INTR_ON, syscall_handler, "syscall");
     list_init(&processes);
     lock_init(&file_operations_lock);
+    sema_init(&temporary, 0);
 }
 
 static void verify_vaddr(uint32_t*, void*);
