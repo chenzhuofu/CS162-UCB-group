@@ -140,9 +140,7 @@ pid_t process_execute(const char* task) {
         args->open_file = open_file;
         sema_init(&(args->sema), 0);
         tid = thread_create(file_name, PRI_DEFAULT, start_process, args);
-        while (!sema_try_down(&(args->sema))) {
-            thread_yield();
-        }
+        sema_down(&(args->sema));
         if (args->success == 0) {
             tid = -1;
         }
@@ -325,16 +323,12 @@ int process_wait(pid_t child_pid) {
         return -1;
     }
 
-    while (!sema_try_down(&temporary)) {
-        thread_yield();
-    }
+    sema_down(&temporary);
 
     while (wait_process->exited == 0) {
         sema_up(&temporary);
         thread_yield();
-        while (!sema_try_down(&temporary)) {
-            thread_yield();
-        }
+        sema_down(&temporary);
     }
 
     int exit_status = wait_process->exit_status;
