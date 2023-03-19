@@ -98,6 +98,8 @@ struct thread {
   struct process* pcb; /* Process control block if this thread is a userprog */
 #endif
 
+  int64_t wait_ticks; /* Number of ticks to wait before unblocking */
+
   /* Owned by thread.c. */
   unsigned magic; /* Detects stack overflow. */
 };
